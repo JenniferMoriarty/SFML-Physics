@@ -31,7 +31,7 @@ int main() {
     //TODO: Add more platforms here!
 
     //################### HOLD ONTO YOUR BUTTS, ITS THE GAME LOOP###############################################################
-    while (renderWindow.isOpen()) {//keep window open until user shuts it down
+    while (renderWindow.isOpen()) {//keep window open until user shuts it down 
    
         while (renderWindow.pollEvent(event)) { //look for events-----------------------
 
