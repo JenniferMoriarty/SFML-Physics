@@ -5,98 +5,106 @@ using namespace std;
 
 int main() {
 
-    //game set up 
-    sf::RenderWindow renderWindow(sf::VideoMode(800,800), "Simple Jumper"); //set up screen
+    //game set up----------------------------------------------------------------------
+    sf::RenderWindow renderWindow(sf::VideoMode(800, 800), "Simple Jumper"); //set up screen
     sf::Event event; //set up event queue
     sf::Clock clock; //set up the clock (needed for game timing)
     const float FPS = 60.0f; //FPS
     renderWindow.setFramerateLimit(FPS); //set FPS
- 
+
     //player setup----------------------------------------------------------------------
     sf::RectangleShape player(sf::Vector2f(30, 30));//size of player (30x30 square)
-    player.setFillColor(sf::Color::White); 
-    float playerX = 25;
-    float playerY = 25;
-    player.setPosition(playerX, playerY); //set position: this is where the top left corner will be
+    player.setFillColor(sf::Color::White);
+    float xpos = 25;
+    float ypos = 25;
+    player.setPosition(xpos, ypos); //set position: this is where the top left corner will be
     //player velocity
-    float pVelx = .0;
-    float pVely = .0;
+    float vx = .0;
+    float vy = .0;
     bool isOnGround = false; //needed to apply gravity
+    bool keys[] = { false, false, false, false };
 
     //platform 1 set up----------------------------------------------------------------------
     sf::RectangleShape platform1(sf::Vector2f(100, 30)); //size of platform (100 x 30 rectangle)
-    platform1.setFillColor(sf::Color::Red); 
-    platform1.setPosition(100, 700); 
+    platform1.setFillColor(sf::Color::Red);
+    platform1.setPosition(100, 700);
 
     //TODO: Add more platforms here!
 
     //################### HOLD ONTO YOUR BUTTS, ITS THE GAME LOOP###############################################################
     while (renderWindow.isOpen()) {//keep window open until user shuts it down 
-   
-        while (renderWindow.pollEvent(event)) { //look for events-----------------------
+
+        while (renderWindow.pollEvent(event)) { //input section-----------------------
 
             //this checks if the user has clicked the little "x" button in the top right corner
             if (event.type == sf::Event::EventType::Closed)
                 renderWindow.close();
 
-            //KEYBOARD INPUT 
-            //code note: I'm not sure why this slows down when the mouse moves, 
-            //or why it works better when this is in the event loop and the other input is not :/
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) keys[2] = true;
+            else keys[2] = false;
+            
+       
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) keys[0] = true;
+            else keys[0] = false;
+          
+            //TODO: add left movement here
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { //checks if "W" is pressed
-                if (isOnGround == true) { //turns off flying
-                    pVely = -15;
-                    isOnGround = false;
-                }
-            }
-            else
-                pVely = 0;
-                       
         }//end event loop---------------------------------------------------------------
 
-        //More keyboard input-----------------------------------------------------------
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { //checks if "D" is pressed
-            pVelx = 8;
-        }
-        //TODO: add left movement here
+        //physics-----------------------------------------------------------------------
+        
+        //jumping
+        if (keys[2] == true) 
+            if (isOnGround == true) {
+                vy = -15;
+                isOnGround = false;
+            }
 
+        //right movement
+        if (keys[0] == true)
+            vx = 8;
+        else
+            vx = 0;
 
-        //GRAVITY----------------------------------------------------------------------
-        if (playerY + 30 > 800) {//check if we've reached the bottom of the screen
+        //TODO: alter the above code to handle left movement too!
+
+        //GRAVITY
+        if (ypos + 30 > 800) {//check if we've reached the bottom of the screen
             isOnGround = true;
-            playerY = 800 - 30; //reset position so feet are on ground
+            ypos = 800 - 30; //reset position so feet are on ground
         }
         else
             isOnGround = false;
 
         //apply gravity if not on ground
         if (isOnGround == false) {
-            pVely += .4; //notice we're ACCELERATING (set equal for steady falling pace)
-            if (pVely > 5) //set TERMINAL VELOCITY
-                pVely = 5;
+            vy += 1; //notice we're ACCELERATING (set equal for steady falling pace)
+            if (vy > 5) //set TERMINAL VELOCITY
+                vy = 5;
         }
-        
+
         //FRICTION-----------------------------------------------------------------------
         if (isOnGround == true)
-            pVelx *= .85;
+            vx *= .85;
         else
-            pVelx *= .95; //less friction in the air
+            vx *= .95; //less friction in the air
 
 
 
         //Collide with platform 1-----------------------------------------------------
-        if (playerY+30 >= 700 && playerY <= 700 + 30 && playerX+30 >= 100 and playerX <= 200) {
+        if (ypos + 30 >= 700 && ypos <= 700 + 30 && xpos + 30 >= 100 and xpos <= 200) {
             isOnGround = true;
-            playerY = 700 - 30; //counteract gravity
+            ypos = 700 - 30; //counteract gravity
         }
         //TODO: add more collision checks with the other platforms you make
 
         //actually move the player!---------------------------------------------------------
-        playerX += pVelx;
-        playerY += pVely;
-        player.setPosition(playerX, playerY);
+        xpos += vx;
+        ypos += vy;
+        player.setPosition(xpos, ypos);
+        cout << "speed is" << vy << endl;
         //cout << "isOnGround is " << isOnGround << endl; //for testing purposes
-        cout << "player x and y are " << playerX << " , " << playerY << endl;
+        //cout << "player x and y are " << xpos << " , " << ypos << endl;
 
         clock.restart();
         //render section-----------------------------------------
